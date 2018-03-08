@@ -1,0 +1,40 @@
+{
+  "name": "live",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "SET DEBUG=live:* && node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/feinwarusoftware/live.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/feinwarusoftware/live/issues"
+  },
+  "homepage": "https://github.com/feinwarusoftware/live#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "express-jwt": "^5.3.0",
+    "express-session": "^1.15.6",
+    "hbs": "^4.0.1",
+    "jsonwebtoken": "^8.2.0",
+    "mongoose": "^5.0.9",
+    "morgan": "^1.9.0",
+    "node-sass-middleware": "^0.11.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "passport-oauth2": "^1.4.0",
+    "path": "^0.12.7",
+    "serve-favicon": "^2.4.5",
+    "session-file-store": "^1.2.0",
+    "socket.io": "^2.0.4"
+  }
+}
