@@ -1,0 +1,17 @@
+.undef {
+  font-family: "Comic Sans MS"; }
+
+.flex-center {
+  color: #fff; }
+
+.intro-1 {
+  background: url("../img/awesomo-bg.jpg") no-repeat center center;
+  background-size: cover; }
+
+.navbar .btn-group .dropdown-menu a:hover {
+  color: #000 !important; }
+
+.navbar .btn-group .dropdown-menu a:active {
+  color: #fff !important; }
+
+/*# sourceMappingURL=style.css.map */

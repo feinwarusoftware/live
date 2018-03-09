@@ -6,14 +6,124 @@ const crypto = require("crypto");
 
 const router = express.Router();
 
-//router.use("/api/v1", require("./api/v1"));
+/**
+ * MAIN.
+ */
+
+const streamers = [
+    {
+        key: "C71A162E1C22BC85F277278FC3FA5",
+        discord: "168690518899949569",
+        channel: "dragon1320",
+        live: false
+    },
+    {
+        key: "3F4121A43D9A8554DA883A775A746",
+        discord: "190914446774763520",
+        channel: "mattheous",
+        live: false
+    },
+    {
+        key: "ADE1B5717EB3ED78663F3126D1544",
+        discord: "230875863644635139",
+        channel: "fa99les",
+        live: false
+    },
+    {
+        key: "73E5D898BB8BB676668DB3ABB2EF2",
+        discord: "161573813379792899",
+        channel: "kamui",
+        live: false
+    },
+    {
+        key: "DD25CA47B14319B45A31EE28F5BB7",
+        discord: "349886534989643779",
+        channel: "paristonhill",
+        live: false
+    },
+    {
+        key: "AB4D17575FB12D42A58DAB4C73417",
+        discord: "262345465306021888",
+        channel: "towelroyale",
+        live: false
+    },
+    {
+        key: "8BB129F6EA1834C3A859992D798DD",
+        discord: "331641326816854028",
+        channel: "tweektweak",
+        live: false
+    }
+];
 
 router.get("/", (req, res) => {
-    res.render("index.hbs", {
-        title: "rawr xd"
-    });
+    return res.render("index.hbs");
 });
 
+router.get("/:streamer", (req, res) => {
+    for (let i = 0; i < streamers.length; i++) {
+        if (streamers[i].channel == req.params.streamer) {
+            return res.render("streamer.hbs", { channel: streamers[i].channel });
+        }
+    }
+    return res.status(404).send("Not found");
+});
+
+router.get("/:streamer/dashboard", (req, res) => {
+    return res.render("dashboard.hbs");
+});
+
+/*
+router.get("/auth/discord", (req, res) => {
+    
+});
+
+router.get("/auth/discord/callback", (req, res) => {
+    
+});
+
+router.get("/auth/streamer", (req, res) => {
+
+});
+*/
+
+router.post("/play", (req, res) => {
+    //filepath
+    //streamkey
+});
+
+router.post("/on_publish", (req, res) => {
+    for (let i = 0; i < streamers.length; i++) {
+        if (streamers[i].key == req.body.name) {
+            streamers[i].live = true;
+            return res.redirect(streamers[i].channel);
+        }
+    }
+
+	return res.status(404).send("Not found");
+});
+
+router.post("/on_publish_done", (req, res) => {
+    
+});
+
+/**
+ * END.
+ */
+
+//index
+
+//:streamer
+//:streamer/dashboard
+
+//auth/discord
+//auth/discord/callback
+
+//auth/streamer
+
+//on_publish
+//on_publish_done
+
+/*
 const keys = {
 	rawrxd: "dragon1320"
 };
@@ -32,6 +142,7 @@ router.post('/on_publish', function (req, res) {
 
 	res.status(404).send("Not found");
 });
+*/
 
 /**
  * PASSPORT TEMP.

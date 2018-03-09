@@ -1,0 +1,26 @@
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<div class="row">
+    <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 embed-responsive embed-responsive-16by9">
+        <video id="video" controls></video>
+    </div>
+    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4">
+        <div id="content" style="width: 500px; height: 300px; margin: 0 0 20px 0; border: solid 1px #999; overflow-y: scroll"></div>
+        <div class="controls">
+            <input class="field" style="width:350px" />
+            <input class="send" type="button" value="send" />
+        </div>
+    </div>
+</div>
+
+<script>
+    if (Hls.isSupported()) {
+        var video = document.getElementById("video");
+        var hls = new Hls();
+        hls.loadSource("http://79.97.226.172:8080/hls/{{channel}}/index.m3u8");
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+        });
+    }
+</script>
