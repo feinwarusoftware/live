@@ -3,6 +3,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const crypto = require("crypto");
+const fs = require("fs");
 
 const router = express.Router();
 
@@ -10,8 +11,7 @@ const router = express.Router();
  * MAIN.
  */
 
-const streamers = [
-    {
+const streamers = [{
         key: "C71A162E1C22BC85F277278FC3FA5",
         discord: "168690518899949569",
         channel: "dragon1320",
@@ -62,14 +62,29 @@ router.get("/", (req, res) => {
 router.get("/:streamer", (req, res) => {
     for (let i = 0; i < streamers.length; i++) {
         if (streamers[i].channel == req.params.streamer) {
-            return res.render("streamer.hbs", { channel: streamers[i].channel });
+            return res.render("streamer.hbs", {
+                channel: streamers[i].channel
+            });
         }
     }
     return res.status(404).send("Not found");
 });
 
 router.get("/:streamer/dashboard", (req, res) => {
-    return res.render("dashboard.hbs");
+    for (let i = 0; i < streamers.length; i++) {
+        if (streamers[i].channel == req.params.streamer) {
+            files = [];
+            fs.readdirSync("./media").forEach(file => {
+                files.push(file);
+            })
+            console.log(files);
+            return res.render("dashboard.hbs", {
+                channel: streamers[i].channel,
+                files: {files}
+            });
+        }
+    }
+    return res.status(404).send("Not found");
 });
 
 /*
@@ -99,11 +114,11 @@ router.post("/on_publish", (req, res) => {
         }
     }
 
-	return res.status(404).send("Not found");
+    return res.status(404).send("Not found");
 });
 
 router.post("/on_publish_done", (req, res) => {
-    
+
 });
 
 /**
