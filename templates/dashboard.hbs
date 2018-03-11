@@ -1,7 +1,9 @@
 <div class="container">
     <ul id="ul">
         {{#each files}}
-            <li><button type="button" class="btn btn-primary">{{this}}</a></li>
+        <li>
+            <button id="{{@index}}" type="button" class="btn btn-primary">{{this}}</button>
+        </li>
         {{/each}}
     </ul>
 </div>
@@ -9,24 +11,22 @@
 <script>
     "use strict";
 
-    let ul = document.getElementById("ul");
-    let items = ul.getElementsByTagName("li");
-    for (let i = 0; i < items.length; i++) {
-        let btn = items[i].getElementsByTagName("button");
-        //alert(btn.id);
-    }
-
     let list = [];
     {{#each files}}
-        list.push("{{this}}");
+    list.push("{{this}}");
     {{/each}}
 
-    for (let i = 0; i < list.length; i++) {
-        alert(list[i]);
-    }
+    let buttons = document.getElementsByTagName("button");
 
     window.onload = function () {
-        
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", function () {
+                var xhr = new XMLHttpRequest();
+                var url = "http://79.97.226.172/play?channel={{channel}}&file="+list[buttons[i].id];
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhr.send();
+            })
+        }
     }
-
 </script>

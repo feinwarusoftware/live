@@ -18,36 +18,6 @@ const server = http.createServer(app);
 const routes = require("./routes");
 const WebSocketServer = require("websocket").server;
 
-////
-
-const db = [];
-
-passport.serializeUser(function (user, done) {
-	done(null, user);
-});
-
-passport.deserializeUser(function (user, done) {
-	done(null, user);
-});
-
-passport.use(new Strategy({
-	authorizationURL: "https://discordapp.com/api/oauth2/authorize",
-	tokenURL: "https://discordapp.com/api/oauth2/token",
-	clientID: "372462428690055169",
-	clientSecret: "suPM0FelWSAtZZSh5lpwqw__sCp86upn",
-	callbackURL: "http://localhost:80/auth/discord/callback",
-	//revocationURL: "https://discordapp.com/api/oauth2/token/revoke",
-	scope: ["identify"]
-}, (accessToken, refreshToken, profile, cb) => {
-	cb(null, {
-		profile: profile,
-		accessToken: accessToken,
-		refreshToken: refreshToken
-	});
-}));
-
-////
-
 app.set("views", path.join(__dirname, "templates"));
 app.set("view engine", "hbs");
 

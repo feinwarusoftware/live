@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const crypto = require("crypto");
 const fs = require("fs");
+const ffmpeg = require("fluent-ffmpeg");
+const cp = require("child_process");
 
 const router = express.Router();
 
@@ -59,6 +61,10 @@ router.get("/", (req, res) => {
     return res.render("index.hbs");
 });
 
+router.get("/test", (req, res) => {
+    return res.render("test.hbs");
+});
+
 router.get("/:streamer", (req, res) => {
     for (let i = 0; i < streamers.length; i++) {
         if (streamers[i].channel == req.params.streamer) {
@@ -77,10 +83,9 @@ router.get("/:streamer/dashboard", (req, res) => {
             fs.readdirSync("./media").forEach(file => {
                 files.push(file);
             })
-            console.log(files);
             return res.render("dashboard.hbs", {
                 channel: streamers[i].channel,
-                files: {files}
+                files: files
             });
         }
     }
@@ -101,9 +106,54 @@ router.get("/auth/streamer", (req, res) => {
 });
 */
 
+let stream;
+
 router.post("/play", (req, res) => {
-    //filepath
-    //streamkey
+    if (!req.query.channel || !req.query.file) {
+        return res.status(404).send("Not found");
+    }
+
+    for (let i = 0; i < streamers.length; i++) {
+        if (streamers[i].channel == req.query.channel) {
+
+            if (stream) {
+                stream.kill("SIGKILL");
+            }
+
+            stream = cp.spawn("ffmpeg", ["-re", "-i", "C:\\Users\\lukas\\Documents\\live\\media\\"+req.query.file, "-b:v", "1M", "-vcodec", "libx264", "-vprofile", "baseline", "-g", "30", "-acodec", "aac", "-strict", "-2", "-f", "flv", "rtmp://localhost/live/"+streamers[i].key]);
+            stream.on("error", (err) => {
+                console.log(err);
+            });
+            stream.on("exit", (code) => {
+                console.log("stream exited with code: "+code);
+            });
+
+            //ffmpeg -re -i example-vid.mp4 -b:v 1M -vcodec libx264 -vprofile baseline -g 30 -acodec aac -strict -2 -f flv rtmp://79.97.226.172/live/C71A162E1C22BC85F277278FC3FA5
+
+            /*
+            if (stream) {
+                stream.kill();
+            }
+
+            stream = ffmpeg("C:\\Users\\lukas\\Documents\\live\\media\\" + req.query.file)
+                .native()
+                .videoCodec("libx264")
+                .audioCodec("aac")
+                .outputFormat("flv")
+                .on("end", () => {
+                    console.log("file has been converted succesfully");
+                })
+                .on("error", err => {
+                    console.log("an error happened: " + err.message);
+                })
+                .save("rtmp://localhost/live/"+streamers[i].key);
+            */
+
+            return res.status(200).send("Success");
+        }
+    }
+
+    return res.status(404).send("Not found");
 });
 
 router.post("/on_publish", (req, res) => {

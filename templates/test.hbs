@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+
+<head>
+    <title> Stream Player </title>
+    <link href="http://vjs.zencdn.net/6.6.3/video-js.css" rel="stylesheet">
+</head>
+
+<body>
+    <center>
+        <video id="livestream" class="video-js vjs-default-skin vjs-big-play-
+centered" controls autoplay preload="auto" width="600" height="300" data-setup='{"techorder" : ["flash"] }'>
+            <source src="rtmp://79.97.226.172:1935/live/rawrxd" type="rtmp/mp4">
+        </video>
+    </center>
+
+    <script src="http://vjs.zencdn.net/6.6.3/video.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-flash@2/dist/videojs-flash.min.js"></script>
+</body>
+
+</html>
