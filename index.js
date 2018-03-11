@@ -17,6 +17,7 @@ const port = process.env.PORT || "80";
 const server = http.createServer(app);
 const routes = require("./routes");
 const WebSocketServer = require("websocket").server;
+const utils = require("./utils");
 
 app.set("views", path.join(__dirname, "templates"));
 app.set("view engine", "hbs");
@@ -65,9 +66,9 @@ app.get("/session", (req, res) => {
 
 ////
 
-app.use(routes);
-
-server.listen(port);
+let wsServer = new WebSocketServer({
+	httpServer: server
+});
 
 let history = [];
 let clients = [];
@@ -81,15 +82,60 @@ colors.sort((a, b) => {
 	return Math.random() > 0.5;
 });
 
-let wsServer = new WebSocketServer({
-	httpServer: server
+app.post("/on_publish", (req, res) => {
+    for (let i = 0; i < utils.streamers.length; i++) {
+        if (utils.streamers[i].key == req.body.name) {
+
+			utils.streamers[i].live = true;
+
+			for (let i = 0; i < clients.length; i++) {
+				clients[i].sendUTF(JSON.stringify({
+					type: "live_update",
+					data: {
+						channel: utils.streamers[i].channel,
+						status: true
+					}
+				}));
+			}
+
+            return res.redirect(utils.streamers[i].channel);
+        }
+    }
+
+    return res.status(404).send("Not found");
 });
+
+app.post("/on_publish_done", (req, res) => {
+    for (let i = 0; i < utils.streamers.length; i++) {
+        if (utils.streamers[i].key == req.body.name) {
+
+			utils.streamers[i].live = false;
+
+			for (let i = 0; i < clients.length; i++) {
+				clients[i].sendUTF(JSON.stringify({
+					type: "live_update",
+					data: {
+						channel: utils.streamers[i].channel,
+						status: false
+					}
+				}));
+			}
+
+			return res.status(200).send("Success");
+        }
+    }
+
+    return res.status(404).send("Not Found");
+});
+
+app.use(routes);
+
+server.listen(port);
 
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
 wsServer.on('request', function (request) {
-	console.log((new Date()) + ' Connection from origin ' +
-		request.origin + '.');
+	console.log((new Date())+' Connection from origin '+request.origin+'.');
 
 	// accept connection - you should check 'request.origin' to
 	// make sure that client is connecting from your website
@@ -97,11 +143,10 @@ wsServer.on('request', function (request) {
 	var connection = request.accept(null, request.origin);
 	// we need to know client index to remove them on 'close' event
 	var index = clients.push(connection) - 1;
-	var userName = false;
-	var userColor = false;
 
 	console.log((new Date()) + ' Connection accepted.');
 
+	/*
 	// send back chat history
 	if (history.length > 0) {
 		connection.sendUTF(
@@ -154,18 +199,12 @@ wsServer.on('request', function (request) {
 			}
 		}
 	});
+	*/
 
 	// user disconnected
-	connection.on('close', function (connection) {
-		if (userName !== false && userColor !== false) {
-			console.log((new Date()) + " Peer " +
-				connection.remoteAddress + " disconnected.");
-
-			// remove user from the list of connected clients
-			clients.splice(index, 1);
-			// push back user's color to be reused by another user
-			colors.push(userColor);
-		}
+	connection.on("close", (conn) => {
+		console.log((new Date())+" Peer "+conn.remoteAddress+" disconnected.");
+		clients.splice(index, 1);
 	});
 });
 

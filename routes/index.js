@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const ffmpeg = require("fluent-ffmpeg");
 const cp = require("child_process");
+const utils = require("../utils");
 
 const router = express.Router();
 
@@ -13,52 +14,8 @@ const router = express.Router();
  * MAIN.
  */
 
-const streamers = [{
-        key: "C71A162E1C22BC85F277278FC3FA5",
-        discord: "168690518899949569",
-        channel: "dragon1320",
-        live: false
-    },
-    {
-        key: "3F4121A43D9A8554DA883A775A746",
-        discord: "190914446774763520",
-        channel: "mattheous",
-        live: false
-    },
-    {
-        key: "ADE1B5717EB3ED78663F3126D1544",
-        discord: "230875863644635139",
-        channel: "fa99les",
-        live: false
-    },
-    {
-        key: "73E5D898BB8BB676668DB3ABB2EF2",
-        discord: "161573813379792899",
-        channel: "kamui",
-        live: false
-    },
-    {
-        key: "DD25CA47B14319B45A31EE28F5BB7",
-        discord: "349886534989643779",
-        channel: "paristonhill",
-        live: false
-    },
-    {
-        key: "AB4D17575FB12D42A58DAB4C73417",
-        discord: "262345465306021888",
-        channel: "towelroyale",
-        live: false
-    },
-    {
-        key: "8BB129F6EA1834C3A859992D798DD",
-        discord: "331641326816854028",
-        channel: "tweektweak",
-        live: false
-    }
-];
-
 router.get("/", (req, res) => {
-    return res.render("index.hbs");
+    return res.render("index.hbs", { streamers: utils.streamers });
 });
 
 router.get("/test", (req, res) => {
@@ -66,10 +23,10 @@ router.get("/test", (req, res) => {
 });
 
 router.get("/:streamer", (req, res) => {
-    for (let i = 0; i < streamers.length; i++) {
-        if (streamers[i].channel == req.params.streamer) {
+    for (let i = 0; i < utils.streamers.length; i++) {
+        if (utils.streamers[i].channel == req.params.streamer) {
             return res.render("streamer.hbs", {
-                channel: streamers[i].channel
+                channel: utils.streamers[i].channel
             });
         }
     }
@@ -77,14 +34,14 @@ router.get("/:streamer", (req, res) => {
 });
 
 router.get("/:streamer/dashboard", (req, res) => {
-    for (let i = 0; i < streamers.length; i++) {
-        if (streamers[i].channel == req.params.streamer) {
+    for (let i = 0; i < utils.streamers.length; i++) {
+        if (utils.streamers[i].channel == req.params.streamer) {
             files = [];
             fs.readdirSync("./media").forEach(file => {
                 files.push(file);
             })
             return res.render("dashboard.hbs", {
-                channel: streamers[i].channel,
+                channel: utils.streamers[i].channel,
                 files: files
             });
         }
@@ -113,14 +70,14 @@ router.post("/play", (req, res) => {
         return res.status(404).send("Not found");
     }
 
-    for (let i = 0; i < streamers.length; i++) {
-        if (streamers[i].channel == req.query.channel) {
+    for (let i = 0; i < utils.streamers.length; i++) {
+        if (utils.streamers[i].channel == req.query.channel) {
 
             if (stream) {
                 stream.kill("SIGKILL");
             }
 
-            stream = cp.spawn("ffmpeg", ["-re", "-i", "C:\\Users\\lukas\\Documents\\live\\media\\"+req.query.file, "-b:v", "1M", "-vcodec", "libx264", "-vprofile", "baseline", "-g", "30", "-acodec", "aac", "-strict", "-2", "-f", "flv", "rtmp://localhost/live/"+streamers[i].key]);
+            stream = cp.spawn("ffmpeg", ["-re", "-i", "C:\\Users\\lukas\\Documents\\live\\media\\"+req.query.file, "-b:v", "1M", "-vcodec", "libx264", "-vprofile", "baseline", "-g", "30", "-acodec", "aac", "-strict", "-2", "-f", "flv", "rtmp://localhost/live/"+utils.streamers[i].key], { stdio: "ignore" });
             stream.on("error", (err) => {
                 console.log(err);
             });
@@ -146,7 +103,7 @@ router.post("/play", (req, res) => {
                 .on("error", err => {
                     console.log("an error happened: " + err.message);
                 })
-                .save("rtmp://localhost/live/"+streamers[i].key);
+                .save("rtmp://localhost/live/"+utils.streamers[i].key);
             */
 
             return res.status(200).send("Success");
@@ -156,19 +113,12 @@ router.post("/play", (req, res) => {
     return res.status(404).send("Not found");
 });
 
-router.post("/on_publish", (req, res) => {
-    for (let i = 0; i < streamers.length; i++) {
-        if (streamers[i].key == req.body.name) {
-            streamers[i].live = true;
-            return res.redirect(streamers[i].channel);
-        }
-    }
-
-    return res.status(404).send("Not found");
-});
-
 router.post("/on_publish_done", (req, res) => {
 
+	console.log(req.body);
+	console.log(req.headers);
+
+    return res.status(200).send("Success");
 });
 
 /**

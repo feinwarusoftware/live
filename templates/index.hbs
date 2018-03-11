@@ -43,42 +43,25 @@
     </div>
     <section id="streamers pb-5">
         <div class="col-12 row pt-3">
-            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
-                <div class="card wow fadeIn">
-                    <img class="img-fluid" src="img/dragon.png" alt="Card image cap">
-                    <div class="card-body">
-                        <h4 class="card-title text-center">Dragon
-                            <span class="badge red">Live</span>
-                        </h4>
-                        <hr>
-                        <p class="card-text">You don't wanna watch my streams.</p>
+            {{#each streamers}}
+                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
+                    <div class="card wow fadeIn">
+                        <img class="img-fluid" src="img/{{this.channel}}.png" alt="Card image cap">
+                        <div class="card-body">
+                            <h4 class="card-title text-center">{{this.name}}
+                                {{#if this.live}}
+                                    <span id="{{this.channel}}" class="live-status badge red">Live</span>
+                                {{else}}
+                                    <span id="{{this.channel}}" class="live-status badge red"></span>
+                                {{/if}}
+                            </h4>
+                            <hr>
+                            <p class="card-text">{{this.about}}</p>
+                            <a class="btn btn-danger" href="{{this.channel}}">Watch Now</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
-                <div class="card wow fadeIn">
-                    <img class="img-fluid" src="img/mattheous.png" alt="Card image cap">
-                    <div class="card-body">
-                        <h4 class="card-title text-center">Matt
-                            <span class="badge red">Live</span>
-                        </h4>
-                        <hr>
-                        <p class="card-text">Streams whenever the fuck he wants.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
-                <div class="card wow fadeIn">
-                    <img class="img-fluid" src="img/towelroyale.png" alt="Card image cap">
-                    <div class="card-body">
-                        <h4 class="card-title text-center">Towel
-                            <span class="badge red">Live</span>
-                        </h4>
-                        <hr>
-                        <p class="card-text">Streams weekly on Tuesdays at 5PM GMT.</p>
-                    </div>
-                </div>
-            </div>
+            {{/each}}
         </div>
     </section>
 </div>
@@ -143,3 +126,58 @@
         </div>
     </div>
 </footer>
+
+<script>
+    window.onload = function() {
+
+        let live_status = document.getElementsByClassName("live-status");
+
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+        if (!window.WebSocket) {
+            console.log("Your browser doesn't support WebSocket.");
+            return;
+        }
+
+        let conn = new WebSocket("ws://79.97.226.172:80");
+
+        conn.onopen = function() {
+
+        }
+
+        conn.onerror = function() {
+            console.log("Error connecting to WebSocket server.");
+        }
+
+        conn.onmessage = function(msg) {
+
+            let json;
+
+            try {
+                json = JSON.parse(msg.data);
+            } catch (e) {
+                console.log("Invalid JSON message: ", msg.data);
+                return;
+            }
+
+            if (json.type == "live_update") {
+                for (let i = 0; i < live_status.length; i++) {
+                    if (json.data.channel == live_status[i].id) {
+                        if (json.data.status == true) {
+                            live_status[i].innerHTML = "Live";
+                        } else {
+                            live_status[i].innerHTML = "";
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        setInterval(function() {
+            if (conn.readyState != 1) {
+                console.log("Unable to communicate with WebSocket server.");
+            }
+        }, 1000);
+    }
+</script>
