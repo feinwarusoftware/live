@@ -22,11 +22,23 @@ router.get("/test", (req, res) => {
     return res.render("test.hbs");
 });
 
+router.get("/profile/mattheous", (req, res) => {
+    return res.render("profiles/mattheous.hbs");
+});
+
+router.get("/profile/dragon1320", (req, res) => {
+    return res.render("profiles/dragon1320.hbs");
+});
+
+router.get("/profile/towelroyale", (req, res) => {
+    return res.render("profiles/towelroyale.hbs");
+});
+
 router.get("/:streamer", (req, res) => {
     for (let i = 0; i < utils.streamers.length; i++) {
         if (utils.streamers[i].channel == req.params.streamer) {
             return res.render("streamer.hbs", {
-                channel: utils.streamers[i].channel
+                streamer: utils.streamers[i],
             });
         }
     }

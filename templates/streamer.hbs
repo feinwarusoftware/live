@@ -1,23 +1,85 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-<div class="row">
-    <div class="col-xl-10 col-lg-9 col-md-8 col-sm-8 col-8">
-        <video id="livestream" class="video-js vjs-default-skin vjs-fluid" controls autoplay preload="auto" data-setup='{"techorder" : ["flash"]}'>
-            <source src="rtmp://79.97.226.172:1935/live/{{channel}}" type="rtmp/mp4">
-        </video>
+<nav class="navbar navbar-expand-lg navbar-dark red fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="img/navbarlogo.png" height="30" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Streamers
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://awesomobot.com">Return to main site</a>
+                </li>
+            </ul>
+            <form class="form-inline">
+                <a href="auth/discord">
+                    <button class="btn btn-sm align-middle btn-outline-white" type="button" href="auth/discord">Login with Discord</button>
+                </a>
+            </form>
+        </div>
     </div>
-    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-4">
-        <div id="content"></div>
-        <div>
-            <span id="status">Connecting...</span>
-            <input type="text" id="input" disabled="disabled" />
+</nav>
+<div class="pt-5"></div>
+<div class="pt-5"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-xl-10 col-lg-9 col-md-12 col-sm-12 col-12">
+            <!--Card-->
+            <div class="card">
+
+                <!--Card image-->
+                <video id="livestream" class="video-js vjs-default-skin vjs-fluid" controls autoplay preload="auto" data-setup='{"techorder" : ["flash"]}'>
+                    <source src="rtmp://79.97.226.172:1935/live/{{channel}}" type="rtmp/mp4">
+                </video>
+
+                <!--Card content-->
+                <div class="card-body">
+                    <!--Title-->
+                    <div class="row">
+                        <div class="col-2">
+                            <img class="rounded-circle" src="img/{{streamer.channel}}.png" width="80%" />
+                        </div>
+                        <div class="col-10">
+                            <h3 class="float-right"><i class="fa fa-eye" aria-hidden="true"></i> 1</h3>                            
+                            <h1 class="">{{streamer.name}}</h1>
+                            <h5>@{{streamer.channel}}</h5>
+                        </div>
+                    </div>
+                    <!--Text-->
+                    <div class="pt-4 row">
+                        <div class="col-12">
+                            <embed width="100%" height="100%" src="profile/{{streamer.channel}}">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--/.Card-->
+        </div>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-4">
+            <div id="content"></div>
+            <div>
+                <span id="status">Connecting...</span>
+                <input type="text" id="input" disabled="disabled" />
+            </div>
         </div>
     </div>
 </div>
 
 
-
-    <!--
+<!--
 <div class="row">
     <div class="col-xl-10 col-lg-9 col-md-8 col-sm-8 col-8 embed-responsive embed-responsive-16by9">
         <video id="livestream" class="video-js vjs-default-skin vjs-fluid" controls autoplay preload="auto" data-setup='{"techorder" : ["flash"]}'>

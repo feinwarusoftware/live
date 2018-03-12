@@ -1,42 +1,35 @@
-<header>
-    <nav class="navbar navbar-expand-lg navbar-dark red fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <img src="img/navbarlogo.png" height="30" alt="">
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Streamers
-                            <span class="sr-only">(current)</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-dark red fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="img/navbarlogo.png" height="30" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Streamers
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://awesomobot.com">Return to main site</a>
+                </li>
+            </ul>
+                        <form class="form-inline">
+                <a href="auth/discord">
+                    <button class="btn btn-sm align-middle btn-outline-white" type="button" href="auth/discord">Login with Discord</button>
+                </a>
+            </form>
         </div>
-    </nav>
-    <section class="view intro-1 hm-black-strong">
-        <div class="full-bg-img flex-center">
-            <div class="container">
-                <ul>
-                    <li>
-                        <div class="col-md-8 offset-md-2">
-                            <img class="wow fadeInDown img-fluid" src="img/headerlogo.png" data-wow-delay="0.2s">
-                        </div>
-                    </li>
-                    <li>
-                        <a class="btn btn-orange btn-lg wow fadeInUp " href="https://www.patreon.com/awesomo" data-wow-delay="0.2s" rel="nofollow">Support on Patreon</a>
-                        <a class="btn btn-indigo btn-lg wow fadeInUp " href="auth/discord" data-wow-delay="0.2s" rel="nofollow">Login with Discord</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-</header>
+    </div>
+</nav>
+
 <div class="container">
     <div class="divider-new pt-5">
         <h2 class="h2-responsive wow fadeIn" data-wow-delay="0.2s">Streamers</h2>
@@ -44,23 +37,22 @@
     <section id="streamers pb-5">
         <div class="col-12 row pt-3">
             {{#each streamers}}
-                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
-                    <div class="card wow fadeIn">
-                        <img class="img-fluid" src="img/{{this.channel}}.png" alt="Card image cap">
-                        <div class="card-body">
-                            <h4 class="card-title text-center">{{this.name}}
-                                {{#if this.live}}
-                                    <span id="{{this.channel}}" class="live-status badge red">Live</span>
-                                {{else}}
-                                    <span id="{{this.channel}}" class="live-status badge red"></span>
-                                {{/if}}
-                            </h4>
-                            <hr>
-                            <p class="card-text">{{this.about}}</p>
-                            <a class="btn btn-danger" href="{{this.channel}}">Watch Now</a>
-                        </div>
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-12">
+                <div class="card wow fadeIn">
+                    <img class="img-fluid" src="img/{{this.channel}}.png" alt="Card image cap">
+                    <div class="card-body">
+                        <h4 class="card-title text-center">{{this.name}} {{#if this.live}}
+                            <span id="{{this.channel}}" class="live-status badge red">Live</span>
+                            {{else}}
+                            <span id="{{this.channel}}" class="live-status badge red"></span>
+                            {{/if}}
+                        </h4>
+                        <hr>
+                        <p class="card-text">{{this.about}}</p>
+                        <a class="btn btn-danger" href="{{this.channel}}">Watch Now</a>
                     </div>
                 </div>
+            </div>
             {{/each}}
         </div>
     </section>
@@ -128,7 +120,7 @@
 </footer>
 
 <script>
-    window.onload = function() {
+    window.onload = function () {
 
         let live_status = document.getElementsByClassName("live-status");
 
@@ -141,15 +133,15 @@
 
         let conn = new WebSocket("ws://79.97.226.172:80");
 
-        conn.onopen = function() {
+        conn.onopen = function () {
 
         }
 
-        conn.onerror = function() {
+        conn.onerror = function () {
             console.log("Error connecting to WebSocket server.");
         }
 
-        conn.onmessage = function(msg) {
+        conn.onmessage = function (msg) {
 
             let json;
 
@@ -174,7 +166,7 @@
             }
         }
 
-        setInterval(function() {
+        setInterval(function () {
             if (conn.readyState != 1) {
                 console.log("Unable to communicate with WebSocket server.");
             }
