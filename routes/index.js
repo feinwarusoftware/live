@@ -10,44 +10,54 @@ const utils = require("../utils");
 
 const router = express.Router();
 
-/**
- * MAIN.
- */
-
 router.get("/", (req, res) => {
-    return res.render("index.hbs", { streamers: utils.streamers });
-});
-
-router.get("/test", (req, res) => {
-    return res.render("test.hbs");
-});
-
-router.get("/profile/mattheous", (req, res) => {
-    return res.render("profiles/mattheous.hbs");
-});
-
-router.get("/profile/dragon1320", (req, res) => {
-    return res.render("profiles/dragon1320.hbs");
-});
-
-router.get("/profile/towelroyale", (req, res) => {
-    return res.render("profiles/towelroyale.hbs");
+    if (!req.session.user) {
+        return res.status(200).render("index.hbs", { streamers: utils.streamers, user: { id: undefined } });
+    }
+    return res.status(200).render("index.hbs", { streamers: utils.streamers, user: req.session.user });
 });
 
 router.get("/:streamer", (req, res) => {
-    for (let i = 0; i < utils.streamers.length; i++) {
-        if (utils.streamers[i].channel == req.params.streamer) {
-            return res.render("streamer.hbs", {
-                streamer: utils.streamers[i],
-            });
-        }
+
+    if (!req.session.token) {
+        req.session.redirect = req.params.streamer; 
+        res.redirect("/auth/discord");
     }
-    return res.status(404).send("Not found");
+
+    axios({
+        method: "get",
+        url: "https://discordapp.com/api/v6/users/@me",
+        headers: {
+            "Authorization": "Bearer "+req.session.token.access_token
+        }
+    }).then(res2 => {
+        req.session.user = res2.data;
+        for (let i = 0; i < utils.streamers.length; i++) {
+            if (utils.streamers[i].channel == req.params.streamer) {
+                return res.render("streamer.hbs", {
+                    streamer: utils.streamers[i],
+                    user: req.session.user
+                });
+            }
+        } 
+    }).catch(err => {
+        return res.status(500).send("Error logging in.");
+    });
 });
 
 router.get("/:streamer/dashboard", (req, res) => {
+
+    if (!req.session.user) {
+        res.redirect("/auth/discord");
+    }
+
     for (let i = 0; i < utils.streamers.length; i++) {
         if (utils.streamers[i].channel == req.params.streamer) {
+
+            if (req.session.user.id != utils.streamers[i].discord) {
+                return res.status(401).send("Unauthorised.");
+            }
+
             files = [];
             fs.readdirSync("./media").forEach(file => {
                 files.push(file);
@@ -60,20 +70,6 @@ router.get("/:streamer/dashboard", (req, res) => {
     }
     return res.status(404).send("Not found");
 });
-
-/*
-router.get("/auth/discord", (req, res) => {
-    
-});
-
-router.get("/auth/discord/callback", (req, res) => {
-    
-});
-
-router.get("/auth/streamer", (req, res) => {
-
-});
-*/
 
 let stream;
 
@@ -97,27 +93,6 @@ router.post("/play", (req, res) => {
                 console.log("stream exited with code: "+code);
             });
 
-            //ffmpeg -re -i example-vid.mp4 -b:v 1M -vcodec libx264 -vprofile baseline -g 30 -acodec aac -strict -2 -f flv rtmp://79.97.226.172/live/C71A162E1C22BC85F277278FC3FA5
-
-            /*
-            if (stream) {
-                stream.kill();
-            }
-
-            stream = ffmpeg("C:\\Users\\lukas\\Documents\\live\\media\\" + req.query.file)
-                .native()
-                .videoCodec("libx264")
-                .audioCodec("aac")
-                .outputFormat("flv")
-                .on("end", () => {
-                    console.log("file has been converted succesfully");
-                })
-                .on("error", err => {
-                    console.log("an error happened: " + err.message);
-                })
-                .save("rtmp://localhost/live/"+utils.streamers[i].key);
-            */
-
             return res.status(200).send("Success");
         }
     }
@@ -125,172 +100,75 @@ router.post("/play", (req, res) => {
     return res.status(404).send("Not found");
 });
 
-router.post("/on_publish_done", (req, res) => {
+let nonces = [];
 
-	console.log(req.body);
-	console.log(req.headers);
+router.get("/auth/discord", (req, res) => {
 
-    return res.status(200).send("Success");
+    const state = crypto.randomBytes(20).toString("hex");
+    nonces.push({ ip: req.ip, state: state });
+
+    return res.redirect("https://discordapp.com/oauth2/authorize?response_type=code&redirect_uri=http%3A%2F%2F79.97.226.172%2Fauth%2Fdiscord%2Fcallback&scope=identify&client_id=372462428690055169&state="+state);
 });
 
-/**
- * END.
- */
+router.get("/auth/discord/callback", (req, res) => {
 
-//index
+    let index = 0;
+    let nonce = undefined;
+    for (let i = 0; i < nonces.length; i++) {
+        if (nonces[i].ip == req.ip) {
+            nonce = nonces[i];
+            index = i;
+            break;
+        }
+    }
 
-//:streamer
-//:streamer/dashboard
+    if (!nonce) {
+        return res.status(500).send("Error logging in.");
+    }
 
-//auth/discord
-//auth/discord/callback
+    nonces.splice(index, 1);
 
-//auth/streamer
-
-//on_publish
-//on_publish_done
-
-/*
-const keys = {
-	rawrxd: "dragon1320"
-};
-
-router.get("/live", (req, res) => {
-    res.render("live.hbs");
-});
-
-router.post('/on_publish', function (req, res) {
-
-	let streamer = keys[req.body.name]; 
-	if (streamer) {
-		res.redirect(streamer);
-		return;
-	}
-
-	res.status(404).send("Not found");
-});
-*/
-
-/**
- * PASSPORT TEMP.
- */
-
-router.get("/auth", (req, res) => {
-
-    /// add state
-    res.redirect("https://discordapp.com/oauth2/authorize?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A80%2Fauth%2Fcallback&scope=identify&client_id=372462428690055169");
-});
-
-const expressJwt = require("express-jwt");
-const authenticate = expressJwt({
-    secret: "server secret"
-});
-
-router.get("/auth/callback", (req, res) => {
-
-    if (!req.query.code) {
-
-        //rip
-        res.redirect("/error");
-        return;
+    if (nonce.state != req.query.state || !req.query.code) {
+        return res.status(500).send("Error logging in.");
     }
 
     axios({
         method: "post",
-        url: "https://discordapp.com/api/oauth2/token?client_id=372462428690055169&client_secret=suPM0FelWSAtZZSh5lpwqw__sCp86upn&grant_type=authorization_code&code=" + req.query.code + "&redirect_uri=http%3A%2F%2Flocalhost%3A80%2Fauth%2Fcallback"
-    }).then(response => {
-        //console.log(response.data);
-
-        axios({
-            method: "get",
-            url: "https://discordapp.com/api/v6/users/@me",
-            headers: {
-                "Authorization": "Bearer " + response.data.access_token
-            }
-        }).then(response => {
-            if (typeof req.session.user === "undefined") {
-                req.session.user = response.data;
-                res.redirect("/session");
-            }
-        }).catch(error => {
-            console.log(error);
-        });
-
-    }).catch(error => {
-        console.log(error);
+        url: "https://discordapp.com/api/oauth2/token?client_id=372462428690055169&client_secret=suPM0FelWSAtZZSh5lpwqw__sCp86upn&grant_type=authorization_code&code="+req.query.code+"&redirect_uri=http%3A%2F%2F79.97.226.172%2Fauth%2Fdiscord%2Fcallback",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    }).then(res2 => {
+        req.session.token = res2.data;
+        if (!req.session.redirect) {
+            return res.status(500).send("Error logging in.");
+        }
+        return res.redirect("/"+req.session.redirect);
+    }).catch(err => {
+        return res.status(500).send("Error logging in.");
     });
-});
-
-router.get("/secret", (req, res) => {
-    console.log(req.session.user);
-    if (!req.session.user) {
-        res.redirect("/");
-        return;
-    }
-    res.json(req.session.user);
-});
-
-router.get("/cookie", (req, res, next) => {
-    if (typeof req.session.views === "undefined") {
-        req.session.views = 0;
-        return res.end("Welcome to the file session demo. Refresh page!");
-    }
 });
 
 /*
-const expressJwt = require("express-jwt");
-const authenticate = expressJwt({
-    secret: "server secret"
-});
-
-router.get("/me", authenticate, function (req, res) {
-    res.status(200).json(req.user);
-});
-
-router.post("/auth", passport.authenticate(
-    "local", {
-        session: false
-    }), serialize, generateToken, respond);
-
-function serialize(req, res, next) {
-    db.updateOrCreate(req.user, function (err, user) {
-        if (err) {
-            return next(err);
-        }
-        // we store the updated information in req.user again
-        req.user = {
-            id: user.id
-        };
-        next();
-    });
-}
-
-const db = {
-    updateOrCreate: function (user, cb) {
-        // db dummy, we just cb the user
-        cb(null, user);
+router.get("/auth/discord/me", (req, res) => {
+    
+    if (!req.session.token.access_token) {
+        return res.status(500).send("Error logging in.");
     }
-};
 
-function generateToken(req, res, next) {
-    req.token = jwt.sign({
-        id: req.user.id,
-    }, "server secret", {
-        expiresIn: 20
+    axios({
+        method: "get",
+        url: "https://discordapp.com/api/v6/users/@me",
+        headers: {
+            "Authorization": "Bearer "+req.session.token.access_token
+        }
+    }).then(res2 => {
+        req.session.user = res2.data;
+        return res.redirect("/");
+    }).catch(err => {
+        return res.status(500).send("Error logging in.");
     });
-    next();
-}
-
-function respond(req, res) {
-    res.status(200).json({
-        user: req.user,
-        token: req.token
-    });
-}
+});
 */
-
-/**
- * END.
- */
 
 module.exports = router;

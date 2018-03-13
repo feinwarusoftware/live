@@ -7,8 +7,6 @@ const sassMiddleware = require("node-sass-middleware");
 const debug = require("debug")("live:server");
 const app = express();
 const http = require("http");
-const passport = require("passport");
-const Strategy = require("passport-oauth2").Strategy;
 const jwt = require("jsonwebtoken");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
@@ -18,6 +16,13 @@ const server = http.createServer(app);
 const routes = require("./routes");
 const WebSocketServer = require("websocket").server;
 const utils = require("./utils");
+const hbs = require("hbs");
+
+// hbs
+hbs.registerHelper("json", function(context) {
+	return JSON.stringify(context);
+});
+//
 
 app.set("views", path.join(__dirname, "templates"));
 app.set("view engine", "hbs");
@@ -44,24 +49,13 @@ app.use(sassMiddleware({
 	sourceMap: true
 }));
 app.use(express.static(path.join(__dirname, "static")));
-app.use(passport.initialize());
 
 ////
-
-app.get("/auth/discord", passport.authenticate("oauth2"));
-
-app.get("/auth/discord/callback",
-	passport.authenticate("oauth2", {
-		failureRedirect: "/error"
-	}),
-	function (req, res) {
-		// Successful authentication, redirect home.
-		res.redirect("/");
-	});
 
 app.get("/session", (req, res) => {
 	console.log(req.session);
 	res.redirect("/");
+	res.status(200);
 });
 
 ////
