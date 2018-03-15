@@ -41,7 +41,8 @@
                 <div class="card wow fadeIn">
                     <img class="img-fluid" src="img/{{this.channel}}.png" alt="Card image cap">
                     <div class="card-body">
-                        <h4 class="card-title text-center">{{this.name}} {{#if this.live}}
+                        <h4 class="card-title text-center">{{this.name}}
+                            {{#if this.live}}
                             <span id="{{this.channel}}" class="live-status badge red">Live</span>
                             {{else}}
                             <span id="{{this.channel}}" class="live-status badge red"></span>
@@ -120,7 +121,7 @@
 </footer>
 
 <script>
-    window.onload = function () {
+    window.onload = function() {
 
         let watch_now_buttons = document.getElementsByClassName("watch-now-button");
 

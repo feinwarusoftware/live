@@ -32,7 +32,9 @@ app.use(session({
 	secret: "keyboard cat",
 	saveUninitialized: false,
 	resave: false,
-	cookie: {},
+	cookie: {
+		maxAge: 604800000
+	},
 	store: new FileStore()
 }));
 app.use(favicon(path.join(__dirname, "static", "favicon.ico")));
@@ -66,6 +68,7 @@ let wsServer = new WebSocketServer({
 
 let history = [];
 let clients = [];
+let chat = [];
 
 function htmlEntities(str) {
 	return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -126,6 +129,58 @@ app.use(routes);
 
 server.listen(port);
 
+wsServer.on("request", req => {
+	console.log("Connection from origin "+req.origin);
+
+	let conn = req.accept(null, req.origin);
+
+	let index = chat.push(conn) - 1;
+
+	console.log("Connection accepted");
+
+	if (history.length > 0) {
+		JSON.stringify({
+			type: "history",
+			data: history
+		});
+	}
+
+	conn.on("message", msg => {
+		if (msg.type === "utf8") {
+
+			if (msg === undefined) {
+				return;
+			}
+			const json = JSON.parse(msg.utf8Data);
+
+			if (json.type === "message") {
+				console.log("Received message from "+req.origin);
+
+				let obj = {
+					type: "message",
+					data: {
+						user: json.data.user,
+						text: htmlEntities(json.data.text)
+					}
+				}
+
+				history.push(obj);
+				history = history.slice(-100);
+
+				for (let i = 0; i < chat.length; i++) {
+					chat[i].sendUTF(JSON.stringify(obj));
+				}
+			}
+		}
+	});
+
+	conn.on("close", conn => {
+		console.log("Peer "+conn.remoteAddress+" disconnected");
+		chat.splice(index, 1);
+	});
+});
+
+/*
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
 wsServer.on('request', function (request) {
@@ -193,7 +248,7 @@ wsServer.on('request', function (request) {
 			}
 		}
 	});
-	*/
+	//*
 
 	// user disconnected
 	connection.on("close", (conn) => {
@@ -201,6 +256,7 @@ wsServer.on('request', function (request) {
 		clients.splice(index, 1);
 	});
 });
+*/
 
 app.use((req, res, next) => {
 	var err = new Error("Not Found");

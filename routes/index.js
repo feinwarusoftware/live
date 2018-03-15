@@ -144,6 +144,7 @@ router.get("/auth/discord/callback", (req, res) => {
             return res.status(500).send("Error logging in.");
         }
         return res.redirect("/"+req.session.redirect);
+        return res.redirect("/");
     }).catch(err => {
         return res.status(500).send("Error logging in.");
     });

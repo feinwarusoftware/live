@@ -72,8 +72,8 @@
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-4">
             <div id="content"></div>
             <div>
-                <span id="status">Connecting...</span>
-                <input type="text" id="input" disabled="disabled" />
+                <span>Chat boii</span>
+                <input type="text" id="input" disabled />
             </div>
         </div>
     </div>
@@ -82,6 +82,74 @@
 <script src="http://vjs.zencdn.net/6.6.3/video.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/videojs-flash@2/dist/videojs-flash.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    window.onload = function() {
+
+        let content = document.getElementById("content");
+        let input = document.getElementById("input");
+
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+        if (!window.WebSocket) {
+            console.log("Your browser doesn't support WebSocket.");
+            return;
+        }
+
+        let conn = new WebSocket("ws://79.97.226.172:80");
+
+        conn.onopen = function() {
+            input.disabled = false;
+        };
+
+        conn.onerror = function() {
+            console.log("Error connecting to WebSocket server.");
+        }
+
+        conn.onmessage = function(msg) {
+            
+            let json;
+
+            try {
+                json = JSON.parse(msg.data);
+            } catch (e) {
+                console.log("Invalid JSON message: ", msg.data);
+                return;
+            }
+
+            if (json.type === "message") {
+                if (json.data.user === "!Dragon1320") {
+                    content.innerHTML += '<p><span class="badge amber darken-2">CUNT</span> <span>'+json.data.text+'</span></p>';
+                } else {
+                    content.innerHTML += "<p><span>"+json.data.user+": "+json.data.text+"</span></p>";
+                }
+                input.disabled = false;
+            }
+        }
+
+        input.onkeydown = function(e) {
+            if (e.keyCode === 13) {
+
+                let msg = input.value;
+                if (!msg) {
+                    return;
+                }
+
+                conn.send(JSON.stringify({
+                    type: "message",
+                    data: {
+                        user: "{{user.username}}",
+                        text: msg
+                    }
+                }));
+                
+                input.value = "";
+
+                input.disabled = true;
+            }
+        };
+    }
+</script>
+<!--
 <script>
     $(function () {
         "use strict";
@@ -213,3 +281,4 @@
         }
     });
 </script>
+-->
